@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Rakesh Peddina | Scroll Story Portfolio</title>
+
+  <style>
+    :root{
+      --bg:#05070a;
+      --text:#cfeee0;
+      --muted: rgba(207,238,224,.78);
+      --green:#4cff99;
+      --accent:#66d9ff;
+
+      --panel: rgba(0, 10, 14, 0.74);
+      --panel2: rgba(0, 10, 14, 0.46);
+      --shadow: 0 16px 60px rgba(0,0,0,.55);
+
+      --radius: 28px;
+      --pill: 999px;
+      --ease: cubic-bezier(.2,.85,.2,1);
+      --ease2: cubic-bezier(.16,1,.3,1);
+
+      --safeTop: env(safe-area-inset-top);
+      --safeBottom: env(safe-area-inset-bottom);
+      --safeLeft: env(safe-area-inset-left);
+      --safeRight: env(safe-area-inset-right);
+
+      /* Layout */
+      --navW: 260px;
+      --stageMax: 1220px;
+      --gap: 18px;
+      --toolboxH: 76vh;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      background: var(--bg);
+      color: var(--text);
+      overflow:hidden;
+    }
+
+    .bg{
+      position:fixed;
+      inset:0;
+      z-index:-3;
+      overflow:hidden;
+      background:#000;
+    }
+    .bg video{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      filter: contrast(1.05) saturate(1.1) brightness(.65);
+      transform: scale(1.02);
+    }
+    .bg::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(900px 560px at 20% 20%, rgba(76,255,153,0.12), transparent 58%),
+        radial-gradient(900px 560px at 80% 18%, rgba(102,217,255,0.11), transparent 58%),
+        linear-gradient(to bottom, rgba(0,0,0,.20), rgba(0,0,0,.82));
+      pointer-events:none;
+    }
+
+    #scroller{
+      position:fixed;
+      inset:0;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      scroll-snap-type:y mandatory;
+      scroll-snap-stop:always;
+      scroll-behavior:smooth;
+      overscroll-behavior-y:contain;
+    }
+    section.step{
+      height:100vh;
+      min-height:100vh;
+      scroll-snap-align:start;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:
+        calc(var(--safeTop) + 20px)
+        calc(var(--safeRight) + 18px)
+        calc(var(--safeBottom) + 18px)
+        calc(var(--safeLeft) + 18px);
+    }
+    .heroOnly{ pointer-events:none; }
+
+    .ui{
+      position:fixed;
+      inset:0;
+      z-index:5;
+      pointer-events:none;
+      padding:
+        calc(var(--safeTop) + 18px)
+        calc(var(--safeRight) + 18px)
+        calc(var(--safeBottom) + 18px)
+        calc(var(--safeLeft) + 18px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .ui.hidden{
+      opacity:0;
+      transform: translateY(14px);
+      filter: blur(8px);
+      transition: opacity 900ms var(--ease2), transform 900ms var(--ease2), filter 900ms var(--ease2);
+    }
+    .ui.visible{
+      opacity:1;
+      transform: translateY(0);
+      filter: blur(0);
+      transition: opacity 900ms var(--ease2), transform 900ms var(--ease2), filter 900ms var(--ease2);
+    }
+
+    .stage{
+      width: min(var(--stageMax), 100%);
+      display:grid;
+      grid-template-columns: 1fr var(--navW);
+      gap: var(--gap);
+      align-items:center;
+      pointer-events:none;
+    }
+
+    .toolbox{
+      pointer-events:auto;
+      position:relative;
+      height: var(--toolboxH);
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      padding: 18px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transform: translateZ(0);
+    }
+
+    .mini{
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap: 12px;
+      padding: 12px 14px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      background: rgba(0,0,0,.45);
+      margin-bottom: 14px;
+    }
+
+    .links{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .links a{
+      text-decoration:none;
+      color: var(--text);
+      font-size:12px;
+      padding: 8px 10px;
+      border-radius: var(--pill);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.28);
+      transition: transform 220ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease);
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .links a:hover{
+      transform: translateY(-1px);
+      border-color: rgba(76,255,153,.24);
+      background: rgba(0,0,0,.38);
+    }
+
+    .panel{
+      position:absolute;
+      inset: 84px 18px 18px 18px;
+      overflow-y:auto;
+      padding-right: 10px;
+      color: #e9fff6;
+      font-size: 15px;
+      line-height: 1.7;
+
+      opacity: 0;
+      transform: translateY(16px) scale(.99);
+      filter: blur(12px);
+      transition: opacity 520ms var(--ease2), transform 520ms var(--ease2), filter 520ms var(--ease2);
+      pointer-events:none;
+    }
+    .panel.active{
+      opacity:1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+      pointer-events:auto;
+    }
+    .panel h2{
+      margin:0 0 12px;
+      font-size: 20px;
+      letter-spacing:.5px;
+      color: var(--accent);
+    }
+    .panel ul{ margin:0; padding-left: 18px; }
+    .panel li{ margin: 6px 0; }
+
+    .panel::-webkit-scrollbar { width: 8px; }
+    .panel::-webkit-scrollbar-thumb { background: rgba(102,217,255,.25); border-radius: 10px; }
+    .panel::-webkit-scrollbar-track { background: rgba(255,255,255,.04); }
+
+    /* ✅ REQUIRED tb-* utility styles (added; used in your content already) */
+    .tb-h{
+      margin: 14px 0 8px;
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(102,217,255,.92);
+    }
+    .tb-list{
+      margin: 0;
+      padding-left: 18px;
+    }
+    .tb-gap{ height: 14px; }
+    .tb-subline{
+      color: rgba(207,238,224,.78);
+      font-size: 13.5px;
+      line-height: 1.65;
+      margin: 0 0 6px;
+    }
+
+    .contactCard{
+      margin-top: 14px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.52);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+    .contactCard .name{
+      font-size: 22px;
+      letter-spacing: .6px;
+      margin: 0 0 6px;
+      color: #eafff6;
+    }
+    .contactCard .desc{
+      margin: 0 0 12px;
+      color: rgba(207,238,224,.88);
+    }
+    .contactGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .contactItem{
+      border:1px solid rgba(76,255,153,.18);
+      border-radius: 18px;
+      padding: 12px;
+      background: rgba(76,255,153,.07);
+    }
+    .contactItem b{ display:block; margin-bottom:6px; }
+    .contactItem a{
+      color: var(--text);
+      text-decoration:none;
+      border-bottom: 1px solid rgba(102,217,255,.22);
+    }
+    .contactItem a:hover{ border-bottom-color: rgba(76,255,153,.35); }
+
+    .navWrap{
+      pointer-events:auto;
+      height: var(--toolboxH);
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(0,0,0,.30), rgba(0,0,0,.18));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow:hidden;
+    }
+    .navTitle{
+      padding: 14px 14px 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .navTitle span{
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(207,238,224,0.70);
+    }
+    .navTitle .status{
+      width:10px;height:10px;border-radius:50%;
+      background: rgba(76,255,153,0.50);
+      box-shadow: 0 0 18px rgba(76,255,153,0.30);
+    }
+
+    .nav{
+      position:relative;
+      padding: 10px;
+    }
+    .nav a{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      width:100%;
+      padding: 10px 12px;
+      border-radius: var(--pill);
+      text-decoration:none;
+      color: rgba(207,238,224,0.86);
+      font-size: 13px;
+      position:relative;
+      z-index:2;
+      transition: color 250ms var(--ease);
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .nav a .num{
+      font-size:11px;
+      color: rgba(207,238,224,0.55);
+      letter-spacing:0.08em;
+    }
+    .nav a:hover{ color: rgba(207,238,224,1); }
+
+    .pill{
+      position:absolute;
+      left:10px;
+      right:10px;
+      height: 40px;
+      border-radius: var(--pill);
+      background:
+        radial-gradient(120px 80px at 20% 40%, rgba(76,255,153,0.18), transparent 60%),
+        radial-gradient(120px 80px at 80% 40%, rgba(102,217,255,0.16), transparent 60%),
+        rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,0.35),
+        0 0 0 1px rgba(76,255,153,0.12) inset;
+      transform: translateY(0);
+      transition: transform 520ms var(--ease2);
+      z-index:1;
+      pointer-events:none;
+      will-change: transform;
+    }
+
+    .hint{
+      position:fixed;
+      left:50%;
+      bottom: calc(var(--safeBottom) + 18px);
+      transform: translateX(-50%);
+      z-index:4;
+      pointer-events:none;
+      opacity:0.9;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 12px;
+      border-radius: var(--pill);
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.26);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: rgba(207,238,224,0.72);
+      font-size:12px;
+      transition: opacity 600ms var(--ease);
+    }
+    .hint.hidden{ opacity:0; }
+    .chev{
+      width: 8px; height: 8px;
+      border-right: 2px solid rgba(207,238,224,0.68);
+      border-bottom: 2px solid rgba(207,238,224,0.68);
+      transform: rotate(45deg);
+      margin-top:-2px;
+      animation: bob 1.4s var(--ease2) infinite;
+    }
+    @keyframes bob{
+      0%,100%{ transform: translateY(0) rotate(45deg); opacity:0.55; }
+      50%{ transform: translateY(4px) rotate(45deg); opacity:0.95; }
+    }
+
+    @media (max-width: 980px){
+      :root{ --navW: 220px; }
+      .stage{ grid-template-columns: 1fr var(--navW); }
+    }
+    @media (max-width: 860px){
+      .stage{
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        gap: 12px;
+      }
+      .toolbox,.navWrap{ height: 44vh; }
+      .panel{ inset: 84px 16px 16px 16px; }
+      .toolbox{ padding: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      #scroller{ scroll-behavior:auto; }
+      .ui, .panel, .pill{ transition:none !important; }
+      .chev{ animation:none; }
+    }
+
+    /* =========================
+       GLASS PROJECT CARDS (clickable)
+       ========================= */
+    #p3 .projList{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    #p3 .projCard{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      padding:14px 16px;
+      background: rgba(0,0,0,.28);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      transition: transform 280ms var(--ease), border-color 280ms var(--ease), background 280ms var(--ease);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #p3 .projCard:hover{
+      transform: translateY(-3px);
+      border-color: rgba(76,255,153,.28);
+      background: rgba(0,0,0,.40);
+    }
+
+    #p3 .projTitle{
+      font-weight:700;
+      color:#eafff6;
+      margin-bottom:4px;
+    }
+
+    #p3 .projTags{
+      font-size:12.5px;
+      color: rgba(207,238,224,.72);
+      letter-spacing:.02em;
+    }
+
+    /* =========================
+       PROJECT MODAL (details popup)
+       ========================= */
+    .projModal{
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 50;
+      padding:
+        calc(var(--safeTop) + 16px)
+        calc(var(--safeRight) + 16px)
+        calc(var(--safeBottom) + 16px)
+        calc(var(--safeLeft) + 16px);
+    }
+    .projModal.show{ display: grid; }
+
+    .projModalInner{
+      width: min(860px, 100%);
+      max-height: 85vh;
+      overflow: auto;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(0,10,14,.78), rgba(0,10,14,.50));
+      box-shadow: 0 20px 70px rgba(0,0,0,.55);
+      padding: 16px 16px 18px;
+    }
+
+    .projClose{
+      float: right;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.35);
+      color: rgba(233,255,246,.95);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+    }
+
+    .projModalHeader{ margin-top: 6px; }
+    .projModalTitle{
+      font-size: 20px;
+      font-weight: 800;
+      color:#eafff6;
+      margin: 10px 0 6px;
+    }
+    .projModalTags{
+      font-size: 12.5px;
+      color: rgba(207,238,224,.72);
+      margin-bottom: 12px;
+    }
+    .projModalDesc{
+      margin: 0 0 14px;
+      color: rgba(233,255,246,.92);
+      line-height: 1.75;
+    }
+
+    .projCols{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 860px){
+      .projCols{ grid-template-columns: 1fr; }
+    }
+
+    .projBox{
+      border: 1px solid rgba(76,255,153,.14);
+      border-radius: 16px;
+      background: rgba(76,255,153,.06);
+      padding: 10px 12px;
+    }
+    .projBox b{
+      display:block;
+      margin-bottom:6px;
+      color: rgba(102,217,255,.95);
+    }
+    .projBox ul{ margin:0; padding-left:18px; }
+    .projBox li{ margin:6px 0; }
+
+    /* =========================
+       CINEMATIC SITE ACCESS INTRO (A + B MIX)
+       ========================= */
+    .introGate{
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding:
+        calc(var(--safeTop) + 18px)
+        calc(var(--safeRight) + 18px)
+        calc(var(--safeBottom) + 18px)
+        calc(var(--safeLeft) + 18px);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: opacity 700ms var(--ease2), transform 700ms var(--ease2);
+      pointer-events:none; /* allows scrolling immediately */
+    }
+
+    .introGate.hidden{
+      opacity:0;
+      transform: translateY(-8px);
+      pointer-events:none;
+    }
+
+    .introCard{
+      width:min(980px,100%);
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg, rgba(0,10,14,.80), rgba(0,10,14,.45));
+      box-shadow:0 24px 80px rgba(0,0,0,.60);
+      padding:22px;
+    }
+
+    .introTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+      gap: 12px;
+    }
+
+    .introTitle{
+      font-size:28px;
+      letter-spacing:.18em;
+      font-weight:900;
+      color:#eafff6;
+    }
+
+    .introPill{
+      font-size:11px;
+      letter-spacing:.25em;
+      text-transform:uppercase;
+      padding:8px 14px;
+      border-radius:999px;
+      border:1px solid rgba(76,255,153,.35);
+      background:rgba(76,255,153,.10);
+      color:#eafff6;
+      box-shadow:0 0 22px rgba(76,255,153,.25);
+      white-space: nowrap;
+    }
+
+    .introLine{
+      margin:8px 0;
+      color:rgba(207,238,224,.88);
+      font-size:14px;
+    }
+
+    .introStatus{
+      margin:10px 0 14px;
+      font-size:12px;
+      letter-spacing:.08em;
+      color:rgba(207,238,224,.78);
+    }
+
+    .introBoot{
+      font-size:13px;
+      line-height:1.8;
+      color:rgba(233,255,246,.92);
+      margin-bottom:12px;
+      min-height:88px;
+    }
+
+    .introScroll{
+      font-size:12px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(207,238,224,.70);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .introArrow{
+      width:8px;height:8px;
+      border-right:2px solid rgba(207,238,224,.7);
+      border-bottom:2px solid rgba(207,238,224,.7);
+      transform:rotate(45deg);
+      animation:introBob 1.2s infinite;
+    }
+
+    @keyframes introBob{
+      0%,100%{ transform:translateY(0) rotate(45deg); }
+      50%{ transform:translateY(4px) rotate(45deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true">
+    <video id="bgVideo" autoplay muted loop playsinline preload="auto">
+      <source src="assets/bg.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  <main id="scroller" aria-label="Scroll storytelling">
+    <section class="step heroOnly" data-section="home" aria-label="Home (video only)"></section>
+    <section class="step" data-section="about" aria-label="About"></section>
+    <section class="step" data-section="skills" aria-label="Skills"></section>
+    <section class="step" data-section="projects" aria-label="Projects"></section>
+
+    <!-- ✅ Certifications step removed -->
+    <section class="step" data-section="experience" aria-label="Experience & Credentials"></section>
+    <section class="step" data-section="contact" aria-label="Contact"></section>
+  </main>
+
+  <div class="ui hidden" id="ui">
+    <div class="stage" id="stage">
+
+      <div class="toolbox">
+        <div class="mini">
+          <div class="links">
+            <a id="emailLink" href="mailto:rakeshpeddina1@gmail.com">Email</a>
+            <a id="phoneLink" href="tel:+12055874411">Call</a>
+            <a id="linkedinLink" href="https://www.linkedin.com/in/rakeshpeddina" target="_blank" rel="noopener">LinkedIn</a>
+            <a id="githubLink" href="https://github.com/ravren414" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+
+        <div class="panel" id="p1">
+          <h2>About</h2>
+
+          <div class="tb-subline">Rakesh Peddina — Civil Engineer</div>
+          <div class="tb-subline">Master’s in Engineering Management (UAB)</div>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">Professional Focus</h3>
+          <ul class="tb-list">
+            <li>Project Planning &amp; Execution</li>
+            <li>Quantity Tracking &amp; Cost Control</li>
+            <li>Site Coordination &amp; Quality Checks</li>
+          </ul>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">Core Strengths</h3>
+          <ul class="tb-list">
+            <li>Structured documentation</li>
+            <li>Team coordination on-site</li>
+            <li>Deadline-driven mindset</li>
+            <li>Process-oriented thinking</li>
+          </ul>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">Career Vision</h3>
+          <ul class="tb-list">
+            <li>Grow into Construction Manager</li>
+            <li>Lead multidisciplinary teams</li>
+            <li>Deliver projects with precision &amp; accountability</li>
+          </ul>
+        </div>
+
+        <div class="panel" id="p2">
+          <h2>Skills</h2>
+
+          <h3 class="tb-h">Project Controls &amp; Execution</h3>
+          <ul class="tb-list">
+            <li>Scheduling support — assisted activity coordination during road recarpeting execution</li>
+            <li>Quantity tracking — verified work quantities for daily progress monitoring</li>
+            <li>Daily progress reporting — maintained structured execution updates</li>
+            <li>Work sequencing awareness — supported logical construction flow</li>
+          </ul>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">Field Coordination &amp; Quality</h3>
+          <ul class="tb-list">
+            <li>Site coordination — collaborated with crew to maintain smooth operations</li>
+            <li>Quality checks — supported inspection of completed work for compliance</li>
+            <li>Documentation discipline — maintained organized project records</li>
+            <li>Safety awareness — applied OSHA 30 construction safety principles</li>
+          </ul>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">Technical &amp; Analytical Tools</h3>
+          <ul class="tb-list">
+            <li>Microsoft Excel — built quantity trackers and progress logs</li>
+            <li>AutoCAD — supported drawing review and quantity reference</li>
+            <li>STAAD Pro — academic structural analysis exposure</li>
+            <li>MS Project / scheduling awareness — understanding of planning logic</li>
+          </ul>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">Construction Knowledge Base</h3>
+          <ul class="tb-list">
+            <li>Asphalt road recarpeting workflow understanding</li>
+            <li>Material and activity tracking exposure</li>
+            <li>Subcontractor coordination awareness</li>
+            <li>Execution-focused project environment experience</li>
+          </ul>
+        </div>
+
+        <div class="panel" id="p3">
+          <h2>Projects</h2>
+
+          <div class="projList" id="projList"></div>
+
+          <div class="projModal" id="projModal" aria-hidden="true">
+            <div class="projModalInner" role="dialog" aria-modal="true" aria-label="Project details">
+              <button class="projClose" id="projClose" aria-label="Close">✕</button>
+
+              <div class="projModalHeader">
+                <div class="projModalTitle" id="projTitle"></div>
+                <div class="projModalTags" id="projTags"></div>
+              </div>
+
+              <div class="projModalBody">
+                <p class="projModalDesc" id="projDesc"></p>
+
+                <div class="projCols">
+                  <div class="projBox">
+                    <b>Key Contributions</b>
+                    <ul id="projContrib"></ul>
+                  </div>
+
+                  <div class="projBox">
+                    <b>Timeline</b>
+                    <ul id="projTimeline"></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ MERGED PANEL: Experience + Certifications -->
+        <div class="panel" id="p4">
+          <h2>Experience &amp; Credentials</h2>
+
+          <h3 class="tb-h">Experience</h3>
+          <ul class="tb-list">
+            <li><b>Road recarpeting coordination:</b> site workflow, resource alignment, quality checks.</li>
+            <li><b>Documentation:</b> tracking progress, reporting issues, and keeping records clean.</li>
+            <li><b>Team handling:</b> worked with crews to deliver smooth execution in real conditions.</li>
+            <li><b>Mindset:</b> detail-oriented, practical, execution-focused.</li>
+          </ul>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">Credentials</h3>
+          <ul class="tb-list">
+            <li>OSHA 30 (Construction)</li>
+            <li>AutoCAD (skills-based)</li>
+            <li>STAAD Pro (structural analysis basics)</li>
+          </ul>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">In Progress / Planned Development</h3>
+          <ul class="tb-list">
+            <li><b>FE Civil Exam</b> — In progress / planned</li>
+            <li>CAPM/PMP</li>
+            <li>BIM (Revit/Navisworks)</li>
+            <li>Primavera P6</li>
+          </ul>
+
+          <div class="tb-gap"></div>
+
+          <h3 class="tb-h">Future</h3>
+          <ul class="tb-list">
+            <li>Certified Construction Manager (CCM)</li>
+            <li>CCP (Cost Professional)</li>
+          </ul>
+        </div>
+
+        <div class="panel" id="p5">
+          <h2>Contact &amp; Connect</h2>
+          <ul>
+            <li><b>Location:</b> Birmingham, AL • Open to Relocation</li>
+            <li><b>Looking for:</b> Project Engineer / Assistant Project Manager / Estimator roles</li>
+            <li><b>Message:</b> “Let’s connect — I can share my resume and portfolio.”</li>
+          </ul>
+
+          <div class="contactCard">
+            <div class="name">Rakesh Peddina</div>
+            <p class="desc">Let’s build something impactful. Reach out for opportunities.</p>
+
+            <div class="contactGrid">
+              <div class="contactItem">
+                <b>Email</b>
+                <a id="emailCard" href="mailto:rakeshpeddina1@gmail.com">rakeshpeddina1@gmail.com</a>
+              </div>
+              <div class="contactItem">
+                <b>LinkedIn</b>
+                <a id="linkedinCard" href="https://www.linkedin.com/in/rakeshpeddina" target="_blank" rel="noopener">
+                  linkedin.com/in/rakeshpeddina
+                </a>
+              </div>
+              <div class="contactItem">
+                <b>Phone</b>
+                <a id="phoneCard" href="tel:+12055874411">+1 (205) 587-4411</a>
+              </div>
+              <div class="contactItem">
+                <b>GitHub</b>
+                <a id="githubCard" href="https://github.com/ravren414" target="_blank" rel="noopener">github.com/ravren414</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="navWrap" aria-label="Sections navigation">
+        <div class="navTitle">
+          <span>Sections</span>
+          <span class="status" aria-hidden="true"></span>
+        </div>
+        <div class="nav" id="nav">
+          <div class="pill" id="pill"></div>
+          <a href="#home" data-go="home"><span>Home</span><span class="num"></span></a>
+          <a href="#about" data-go="about"><span>About</span><span class="num"></span></a>
+          <a href="#skills" data-go="skills"><span>Skills</span><span class="num"></span></a>
+          <a href="#projects" data-go="projects"><span>Projects</span><span class="num"></span></a>
+
+          <!-- ✅ Certifications nav removed; replaced label -->
+          <a href="#experience" data-go="experience"><span>Experience &amp; Credentials</span><span class="num"></span></a>
+
+          <a href="#contact" data-go="contact"><span>Contact</span><span class="num"></span></a>
+        </div>
+      </nav>
+
+    </div>
+  </div>
+
+  <div class="hint" id="hint" aria-hidden="true">
+    <div class="chev"></div>
+    <div>Scroll</div>
+  </div>
+
+  <!-- =========================
+       SITE ACCESS INTRO
+       ========================= -->
+  <div class="introGate" id="introGate">
+    <div class="introCard">
+      <div class="introTop">
+        <div class="introTitle">SITE ACCESS AUTHORIZED</div>
+        <div class="introPill">AUTHORIZED</div>
+      </div>
+
+      <div class="introLine">
+        Welcome to the digital project workspace of Rakesh Peddina
+      </div>
+
+      <div class="introStatus">
+        PPE CHECK: PASS • PERMIT: APPROVED • ZONE: ACTIVE
+      </div>
+
+      <div class="introBoot" id="introBoot"></div>
+
+      <div class="introScroll">
+        <div class="introArrow"></div>
+        <div>SCROLL DOWN TO LOAD MORE</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const scroller = document.getElementById('scroller');
+    const ui = document.getElementById('ui');
+    const hint = document.getElementById('hint');
+
+    const nav = document.getElementById('nav');
+    const pill = document.getElementById('pill');
+
+    const sections = Array.from(document.querySelectorAll('section.step'));
+
+    // ✅ Updated panels (Certifications panel removed; Experience merged)
+    const panels = [
+      document.getElementById("p1"), // About
+      document.getElementById("p2"), // Skills
+      document.getElementById("p3"), // Projects
+      document.getElementById("p4"), // Experience & Credentials (merged)
+      document.getElementById("p5")  // Contact
+    ];
+
+    const order = sections.map(s => s.dataset.section);
+    const indexOf = (key) => Math.max(0, order.indexOf(key));
+
+    // ✅ Updated mapping (certifications removed)
+    const sectionToPanelIndex = {
+      about: 0,
+      skills: 1,
+      projects: 2,
+      experience: 3,
+      contact: 4
+    };
+
+    function prefersReducedMotion(){
+      return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function ensureVideoPlays(){
+      const v = document.getElementById('bgVideo');
+      if(!v) return;
+      const p = v.play();
+      if(p && typeof p.catch === 'function'){ p.catch(()=>{}); }
+    }
+
+    function showPanel(i){
+      panels.forEach((p, idx) => p.classList.toggle('active', idx === i));
+    }
+
+    function updateUiVisibility(currentIdx){
+      if(currentIdx === 0){
+        ui.classList.remove('visible');
+        ui.classList.add('hidden');
+        hint.classList.remove('hidden');
+      } else {
+        ui.classList.remove('hidden');
+        ui.classList.add('visible');
+        hint.classList.add('hidden');
+      }
+    }
+
+    // ✅ iOS-perfect alignment using real rendered positions
+    function movePillTo(key){
+      const link = nav.querySelector(`a[data-go="${CSS.escape(key)}"]`);
+      if(!link) return;
+
+      const navRect  = nav.getBoundingClientRect();
+      const linkRect = link.getBoundingClientRect();
+      const pillH    = pill.getBoundingClientRect().height || 40;
+
+      const y = (linkRect.top - navRect.top) + (linkRect.height - pillH) / 2;
+      pill.style.transform = `translateY(${y}px)`;
+    }
+
+    function setActive(key){
+      if(key === 'home'){
+        updateUiVisibility(0);
+        requestAnimationFrame(() => movePillTo('home'));
+        return;
+      }
+
+      updateUiVisibility(indexOf(key));
+
+      const pIdx = sectionToPanelIndex[key];
+      if(typeof pIdx === "number") showPanel(pIdx);
+      else showPanel(0);
+
+      requestAnimationFrame(() => requestAnimationFrame(() => movePillTo(key)));
+      history.replaceState(null, "", "#" + key);
+    }
+
+    function scrollToSection(key){
+      const idx = indexOf(key);
+      const target = sections[idx];
+      if(!target) return;
+      target.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+    }
+
+    nav.querySelectorAll('a[data-go]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        e.preventDefault();
+        scrollToSection(a.dataset.go);
+      }, {passive:false});
+    });
+
+    function computeActive(){
+      const top = scroller.scrollTop;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const idx = Math.round(top / vh);
+      const clamped = Math.min(Math.max(idx, 0), sections.length - 1);
+      const key = sections[clamped].dataset.section;
+      return { idx: clamped, key };
+    }
+
+    let wheelLock = false;
+    scroller.addEventListener('wheel', (event)=>{
+      if(prefersReducedMotion()) return;
+      if(wheelLock) return;
+      wheelLock = true;
+
+      const { idx } = computeActive();
+      const dir = event.deltaY > 0 ? 1 : -1;
+      const next = Math.min(Math.max(idx + dir, 0), sections.length - 1);
+      sections[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      setTimeout(()=> wheelLock = false, 620);
+    }, {passive:true});
+
+    let touchStartY = 0, touchStartX = 0, touchActive = false;
+    scroller.addEventListener('touchstart', (e)=>{
+      if(!e.touches || !e.touches[0]) return;
+      touchActive = true;
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+    }, {passive:true});
+
+    scroller.addEventListener('touchend', (e)=>{
+      if(prefersReducedMotion()) return;
+      if(!touchActive) return;
+      touchActive = false;
+      const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+      if(!t) return;
+
+      const dy = t.clientY - touchStartY;
+      const dx = t.clientX - touchStartX;
+
+      if(Math.abs(dx) > Math.abs(dy)) return;
+      if(Math.abs(dy) < 40) return;
+
+      const { idx } = computeActive();
+      const dir = dy < 0 ? 1 : -1;
+      const next = Math.min(Math.max(idx + dir, 0), sections.length - 1);
+      sections[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, {passive:true});
+
+    const io = new IntersectionObserver((entries)=>{
+      let best = null;
+      for(const ent of entries){
+        if(!best || ent.intersectionRatio > best.intersectionRatio) best = ent;
+      }
+      if(!best) return;
+      const key = best.target.dataset.section;
+      if(!key) return;
+      setActive(key);
+    }, { root: scroller, threshold: [0.55, 0.65, 0.75, 0.85] });
+
+    sections.forEach(s=> io.observe(s));
+
+    function syncContactLinks(){
+      const emailHref = document.getElementById('emailLink')?.getAttribute('href') || "mailto:rakeshpeddina1@gmail.com";
+      const phoneHref = document.getElementById('phoneLink')?.getAttribute('href') || "tel:+12055874411";
+      const linkedinHref = document.getElementById('linkedinLink')?.getAttribute('href') || "https://www.linkedin.com/in/rakeshpeddina";
+      const githubHref = document.getElementById('githubLink')?.getAttribute('href') || "https://github.com/ravren414";
+
+      const emailCard = document.getElementById('emailCard');
+      const phoneCard = document.getElementById('phoneCard');
+      const linkedinCard = document.getElementById('linkedinCard');
+      const githubCard = document.getElementById('githubCard');
+
+      if(emailCard){
+        emailCard.href = emailHref;
+        emailCard.textContent = emailHref.replace("mailto:","");
+      }
+
+      if(phoneCard){
+        phoneCard.href = phoneHref;
+        phoneCard.textContent = "+1 (205) 587-4411";
+      }
+
+      if(linkedinCard){
+        linkedinCard.href = linkedinHref;
+        linkedinCard.textContent = linkedinHref.replace(/^https?:\/\//,"");
+      }
+
+      if(githubCard){
+        githubCard.href = githubHref;
+        githubCard.textContent = githubHref.replace(/^https?:\/\//,"");
+      }
+    }
+
+    // =========================
+    // Projects: Clickable Cards + Modal Data
+    // =========================
+    const PROJECTS = [
+      {
+        title: "Foot Over Bridge (FOB) — Railway Project",
+        tags: "Field Execution • Structural • Railway Environment",
+        desc:
+          "Worked as a Field Engineer during the construction of a railway Foot Over Bridge at Yogendra Constructions, supporting day-to-day field execution in a live railway environment. Assisted in crew coordination, verified site layouts against approved drawings, and supported material/equipment planning to maintain smooth progress. Ensured adherence to safety protocols, quality requirements, and construction sequencing while contributing to timely completion of structural activities.",
+        contrib: [
+          "Supported daily site activities and crew coordination",
+          "Verified layout and levels as per approved structural drawings",
+          "Monitored material usage and work progress",
+          "Coordinated with supervisors, vendors, and field teams",
+          "Maintained compliance with safety and quality procedures",
+          "Assisted in resolving on-site execution issues"
+        ],
+        timeline: [
+          "Week 1–2: Mobilization & layout verification",
+          "Week 3–6: Structural execution support",
+          "Week 7–8: Finishing works & inspections"
+        ]
+      },
+      {
+        title: "Bitumen Road Recarpeting & QA Coordination",
+        tags: "Roadworks • Quantity Tracking • Quality Control",
+        desc:
+          "Coordinated field execution of a roadway resurfacing project focused on improving pavement performance and ride quality. Monitored material quantities, supported site supervision, and ensured compliance with quality and safety standards. Worked closely with contractors and field crews to maintain smooth workflow and timely delivery.",
+        contrib: [
+          "Tracked bitumen and aggregate quantities",
+          "Coordinated daily paving activities",
+          "Supported quality checks during laying and rolling",
+          "Maintained progress records and site communication",
+          "Assisted in resolving field-level issues"
+        ],
+        timeline: [
+          "Week 1: Planning & mobilization",
+          "Weeks 2–3: Surface preparation",
+          "Weeks 4–6: Bitumen laying & rolling",
+          "Week 7: QA checks & closeout"
+        ]
+      },
+      {
+        title: "Transportation Planning — Trip Distribution & Traffic Assignment",
+        tags: "BPR Equation • Traffic Modeling • Network Analysis",
+        desc:
+          "Performed transportation planning analysis using production–attraction data and the BPR equation to model network traffic flow. Evaluated route loading behavior and congestion impacts through incremental traffic assignment methodology and documented network performance results.",
+        contrib: [
+          "Prepared demand inputs (production–attraction)",
+          "Applied BPR function for travel time estimation",
+          "Executed incremental traffic assignment",
+          "Interpreted congestion and link performance",
+          "Summarized results in report-ready format"
+        ],
+        timeline: [
+          "Week 1: Data preparation",
+          "Weeks 2–3: Model setup",
+          "Weeks 4–5: Assignment runs",
+          "Week 6: Analysis & reporting"
+        ]
+      },
+      {
+        title: "Bridge Engineering — Structural Analysis Study",
+        tags: "Structural Behavior • Load Path • Analysis",
+        desc:
+          "Conducted structural behavior assessment of bridge systems through analysis-based evaluation. Examined load distribution and member force response to understand bridge performance and strengthened core structural concepts.",
+        contrib: [
+          "Reviewed load path and force distribution",
+          "Evaluated member behavior under loading",
+          "Connected analysis outcomes to design decisions",
+          "Prepared structured technical summary"
+        ],
+        timeline: [
+          "Weeks 1–2: Theory review",
+          "Weeks 3–4: Structural analysis",
+          "Week 5: Evaluation & reporting"
+        ]
+      },
+      {
+        title: "Carbon Credit Exchange for Construction",
+        tags: "ESG • Carbon Accounting • Sustainability",
+        desc:
+          "Developed a conceptual carbon credit exchange framework tailored for construction projects to quantify emissions and enable participation in carbon markets. Explored integration of sustainability metrics into project decisions and created a milestone-based implementation plan.",
+        contrib: [
+          "Designed carbon accounting workflow",
+          "Researched construction emission factors",
+          "Developed conceptual exchange structure",
+          "Evaluated market feasibility",
+          "Created milestone-based implementation plan"
+        ],
+        timeline: [
+          "Weeks 1–2: Literature review",
+          "Weeks 3–5: Framework development",
+          "Weeks 6–7: Market & financial analysis",
+          "Week 8: Final documentation"
+        ]
+      }
+    ];
+
+    function renderProjects(){
+      const list = document.getElementById("projList");
+      if(!list) return;
+
+      list.innerHTML = PROJECTS.map((p, i) => `
+        <div class="projCard" data-proj="${i}">
+          <div class="projTitle">${p.title}</div>
+          <div class="projTags">${p.tags}</div>
+        </div>
+      `).join("");
+
+      list.querySelectorAll(".projCard").forEach(card=>{
+        card.addEventListener("click", ()=>{
+          const idx = Number(card.getAttribute("data-proj"));
+          openProject(idx);
+        });
+      });
+    }
+
+    const projModal = document.getElementById("projModal");
+    const projClose = document.getElementById("projClose");
+
+    function openProject(i){
+      const p = PROJECTS[i];
+      if(!p) return;
+
+      document.getElementById("projTitle").textContent = p.title;
+      document.getElementById("projTags").textContent = p.tags;
+      document.getElementById("projDesc").textContent = p.desc;
+
+      document.getElementById("projContrib").innerHTML =
+        p.contrib.map(x => `<li>${x}</li>`).join("");
+
+      document.getElementById("projTimeline").innerHTML =
+        p.timeline.map(x => `<li>${x}</li>`).join("");
+
+      projModal.classList.add("show");
+      projModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeProject(){
+      projModal.classList.remove("show");
+      projModal.setAttribute("aria-hidden", "true");
+    }
+
+    projClose?.addEventListener("click", closeProject);
+    projModal?.addEventListener("click", (e)=>{
+      if(e.target === projModal) closeProject();
+    });
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape") closeProject();
+    });
+
+    /* =========================
+       INTRO BOOT SEQUENCE (A + B MIX)
+       ========================= */
+    const introGate = document.getElementById("introGate");
+    const introBoot = document.getElementById("introBoot");
+
+    function runIntroBoot(){
+      if(!introBoot) return;
+
+      const lines = [
+        "Initializing project environment...",
+        "Loading drawings... 28%",
+        "Loading BOQ... 61%",
+        "Syncing site data... 92%",
+        "Workspace Ready."
+      ];
+
+      introBoot.innerHTML = "";
+      let i = 0;
+
+      function typeLine(){
+        if(i >= lines.length) return;
+
+        const line = document.createElement("div");
+        introBoot.appendChild(line);
+
+        let j = 0;
+        const txt = lines[i];
+
+        const t = setInterval(()=>{
+          line.textContent = txt.slice(0, j++);
+          if(j > txt.length){
+            clearInterval(t);
+            i++;
+            setTimeout(typeLine, 220);
+          }
+        }, 18);
+      }
+
+      typeLine();
+    }
+
+    let introClosed = false;
+    function hideIntroGate(){
+      if(introClosed) return;
+      introClosed = true;
+      introGate?.classList.add("hidden");
+    }
+
+    // Hide on first scroll movement
+    scroller.addEventListener("scroll", ()=>{
+      if(scroller.scrollTop > 20) hideIntroGate();
+    }, {passive:true});
+
+    function init(){
+      showPanel(0);
+      requestAnimationFrame(() => requestAnimationFrame(() => movePillTo('home')));
+
+      syncContactLinks();
+      renderProjects();
+
+      const hash = (location.hash || "").replace("#","").trim();
+      if(hash && order.includes(hash)){
+        setTimeout(()=> scrollToSection(hash), 60);
+      }
+
+      ensureVideoPlays();
+      runIntroBoot();
+
+      document.addEventListener('visibilitychange', ensureVideoPlays);
+      window.addEventListener('focus', ensureVideoPlays);
+      window.addEventListener('resize', ()=>{
+        requestAnimationFrame(() => requestAnimationFrame(() => movePillTo(computeActive().key)));
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
